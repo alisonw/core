@@ -8,6 +8,7 @@ Feature: download file
     Given user "user0" has been created with default attributes and without skeleton files
     And user "user0" has uploaded file with content "ownCloud test text file 0" to "/textfile0.txt"
     And user "user0" has uploaded file with content "Welcome this is just an example file for developers." to "/welcome.txt"
+    Given user "user1" has been created with default attributes and without skeleton files
 
   @smokeTest
   Scenario Outline: download a file
@@ -19,6 +20,7 @@ Feature: download file
       | old         |
       | new         |
 
+  @skipOnOcis @issue-ocis-reva-12
   Scenario Outline: download a file with range
     Given using <dav_version> DAV path
     When user "user0" downloads file "/welcome.txt" with range "bytes=24-50" using the WebDAV API
@@ -40,6 +42,7 @@ Feature: download file
       | new         |
 
   @smokeTest
+  @skipOnOcis
   Scenario Outline: Downloading a file should serve security headers
     Given using <dav_version> DAV path
     When user "user0" downloads file "/welcome.txt" using the WebDAV API
@@ -59,6 +62,7 @@ Feature: download file
       | old         |
       | new         |
 
+  @skipOnOcis
   Scenario Outline: Doing a GET with a web login should work without CSRF token on the new backend
     Given using <dav_version> DAV path
     And user "user0" has logged in to a web-style session
@@ -70,6 +74,7 @@ Feature: download file
       | old         |
       | new         |
 
+  @skipOnOcis
   Scenario Outline: Doing a GET with a web login should work with CSRF token on the new backend
     Given using <dav_version> DAV path
     And user "user0" has logged in to a web-style session
