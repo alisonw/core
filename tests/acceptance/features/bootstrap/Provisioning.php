@@ -404,11 +404,13 @@ trait Provisioning {
 	 * @throws \LdapException
 	 */
 	public function connectToLdap($suiteParameters) {
+		$useSsl = false;
 		if (OcisHelper::isTestingOnOcis()) {
-			$this->ldapBaseDN = 'dc=owncloud,dc=com';
-			$this->ldapHost = 'localhost';
-			$this->ldapPort = 389;
-			$this->ldapAdminUser = 'cn=admin,dc=owncloud,dc=com';
+			$this->ldapBaseDN = OcisHelper::getBaseDN();
+			$this->ldapHost = OcisHelper::getHostname();
+			$this->ldapPort = OcisHelper::getLdapPort();
+			$useSsl = OcisHelper::useSsl();
+			$this->ldapAdminUser = OcisHelper::getBindDN();
 		} else {
 			$occResult = SetupHelper::runOcc(
 				['ldap:show-config', 'LDAPTestId', '--output=json']
@@ -443,6 +445,7 @@ trait Provisioning {
 			'port' => $this->ldapPort,
 			'password' => $this->ldapAdminPassword,
 			'bindRequiresDn' => true,
+			'useSsl' => $useSsl,
 			'baseDn' => $this->ldapBaseDN,
 			'username' => $this->ldapAdminUser
 		];
@@ -1956,10 +1959,20 @@ trait Provisioning {
 	 * @return bool
 	 */
 	public function userExists($user) {
+		// in OCIS there is no admin user and in oC10 there are issues when
+		// sending the username in lowercase in the auth but in uppercase in
+		// the URL see https://github.com/owncloud/core/issues/36822
+		if (OcisHelper::isTestingOnOcis()) {
+			$requestingUser = $this->getActualUsername($user);
+			$requestingPassword = $this->getPasswordForUser($requestingUser);
+		} else {
+			$requestingUser = $this->getAdminUsername();
+			$requestingPassword = $this->getAdminPassword();
+		}
 		$fullUrl = $this->getBaseUrl() . "/ocs/v2.php/cloud/users/$user";
 		$this->response = HttpRequestHelper::get(
-			$fullUrl, $this->getActualUsername($user),
-			$this->getPasswordForUser($user)
+			$fullUrl, $requestingUser,
+			$requestingPassword
 		);
 		if ($this->response->getStatusCode() >= 400) {
 			return false;

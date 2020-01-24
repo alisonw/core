@@ -48,6 +48,45 @@ class OcisHelper {
 	}
 
 	/**
+	 * @return int|string
+	 */
+	public static function getLdapPort() {
+		$port = \getenv("REVA_LDAP_PORT");
+		return $port ? $port : 636;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function useSsl() {
+		return (self::getLdapPort() === 636);
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getBaseDN() {
+		$port = \getenv("REVA_LDAP_BASE_DN");
+		return $port ? $port : "dc=owncloud,dc=com";
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getHostname() {
+		$port = \getenv("REVA_LDAP_HOSTNAME");
+		return $port ? $port : "localhost";
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getBindDN() {
+		$port = \getenv("REVA_LDAP_BIND_DN");
+		return $port ? $port : "cn=admin,dc=owncloud,dc=com";
+	}
+
+	/**
 	 * @return string
 	 */
 	private static function getOcisRevaDataRoot() {
